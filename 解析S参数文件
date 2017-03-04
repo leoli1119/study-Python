@@ -1,1 +1,38 @@
+# 初步解析S参数文件
+def read_sparam_file(path_sparam): 
 
+import numpy as np
+
+# s参数端口数量
+n = int(path_sparam.split(".")[-1][1:-1])  
+
+s_comment = ""  # s参数文件中的注释信息
+l_unit = list()  # s参数文件中的单位和端口阻抗
+arr_data = np.array([])  # s参数文件中的数据
+
+with open(path_sparam,"r") as file_sparam:
+
+    # 处理整个文件
+    for s_line in file_sparam:
+
+        # 处理一行的数据
+        if s_line.startswith("!"):
+            s_comment += s_line
+        elif s_line.startswith("#"):
+            l_unit += s_line.split()[1:]
+        else:
+            for s_data in s_line.split():
+                try:
+                    f_data = float(s_data)
+                except:
+                    print("S-parameters file error!")
+                else:
+                    arr_data = np.append(arr_data,f_data)
+
+    # 重新更改数组形状
+    try:
+        arr_data = arr_data.reshape((-1,n*n*2+1))
+    except:
+        print("S-parameters file error!")
+
+return dict((["comment",s_comment],["unit",l_unit],["data",arr_data]))
